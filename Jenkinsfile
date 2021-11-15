@@ -57,12 +57,12 @@ pipeline {
                 }
                 
                 // build brand new bagatea-container with bagatea-image
-                sh """docker run -u root -d --name 3x03-con \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v "$HOME":/home \
-                -p 5000:5000 \
-                -e VIRTUAL_PORT=5000 \
-                3x03-img"""
+                // sh """docker run -u root -d --name 3x03-con \
+                // -v /var/run/docker.sock:/var/run/docker.sock \
+                // -v "$HOME":/home \
+                // -p 5000:5000 \
+                // -e VIRTUAL_PORT=5000 \
+                // 3x03-img"""
 
                 sh 'nohup flask run &'
                 sh 'pytest -s -rA --junitxml=logs/report.xml'
