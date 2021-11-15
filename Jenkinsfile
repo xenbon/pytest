@@ -61,7 +61,7 @@ pipeline {
 //                         }
 //                     }
 //                 }
-                stage('Test: Unit, Integration and UI Tests') {
+//                 stage('Test: Unit, Integration and UI Tests') {
                     agent {
                         docker {
                             image '3x03-img:latest'
@@ -80,7 +80,7 @@ pipeline {
                             junit testResults: 'logs/report.xml'
                         }
                     }
-                }
+//                 }
 //             }
         }
         stage('Deliver') {
