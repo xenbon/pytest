@@ -10,13 +10,13 @@ pipeline {
         stage('Build') { 
             steps {
                 script {
-                    try {
-                        // clean all unused images
-                        sh 'yes | docker image prune -a'
-                    }
-                    catch (Exception e) {
-                        echo "no unused images deleted"
-                    }
+                    // try {
+                    //     // clean all unused images
+                    //     sh 'yes | docker image prune -a'
+                    // }
+                    // catch (Exception e) {
+                    //     echo "no unused images deleted"
+                    // }
                     try {
                         // clean all unused containers
                         sh 'yes | docker container prune'
@@ -26,7 +26,7 @@ pipeline {
                     }
                 }
                 // ensure latest image is being build
-                sh 'docker build -t 3x03-img:latest .'
+                // sh 'docker build -t 3x03-img:latest .'
             }
         }
     
