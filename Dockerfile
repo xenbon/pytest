@@ -13,7 +13,8 @@ RUN export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/driver
 #     apt-get install -y default-jdk
 
 # Install Firefox
-RUN apt install firefox-esr -y
+RUN apt-get update && \
+    apt-get install firefox-esr -y
     
 # # Setup JAVA_HOME -- useful for docker commandline
 # ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
