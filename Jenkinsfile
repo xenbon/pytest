@@ -68,7 +68,8 @@ pipeline {
                         }
                     }
                     steps {
-                        sh 'nohup flask run & pytest -s -rA --junitxml=logs/report.xml'
+                        sh 'nohup flask run & '
+                        sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
 //                         sh 'nohup python3 app.py & pytest -s -rA --junitxml=logs/report.xml'
