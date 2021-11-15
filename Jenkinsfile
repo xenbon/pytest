@@ -10,13 +10,13 @@ pipeline {
         stage('Build') { 
             steps {
                 script {
-                    // try {
-                    //     // clean all unused images
-                    //     sh 'yes | docker image prune -a'
-                    // }
-                    // catch (Exception e) {
-                    //     echo "no unused images deleted"
-                    // }
+                    try {
+                        // clean all unused images
+                        sh 'yes | docker image prune -a'
+                    }
+                    catch (Exception e) {
+                        echo "no unused images deleted"
+                    }
                     try {
                         // clean all unused containers
                         sh 'yes | docker container prune'
@@ -26,66 +26,116 @@ pipeline {
                     }
                 }
                 // ensure latest image is being build
-                // sh 'docker build -t 3x03-img:latest .'
+                sh 'docker build -t 3x03-img:latest .'
             }
         }
     
         stage('Test') {
-            parallel {
-                stage('Deploy') {
-                    agent any
-                    steps {        
-                        script {
-                            try {
-                                // stop bagatea-container
-                                sh 'yes | docker stop 3x03-con'
-                            }
-                            catch (Exception e) {
-                                echo "no container to stop"
-                            }
+            agent {
+                docker {
+                    image '3x03-img:latest'
+                    args '-p 5000:5000'
+                }
+            }
+            steps {
+                script {
+                    try {
+                        // stop bagatea-container
+                        sh 'yes | docker stop 3x03-con'
+                    }
+                    catch (Exception e) {
+                        echo "no container to stop"
+                    }
 
-                            try {
-                                // delete bagatea-container
-                                sh 'yes | docker rm 3x03-con'
-                            }
-                            catch (Exception e) {
-                                echo "no container to remove"
-                            }
-                        }
-                        // // build brand new bagatea-container with bagatea-image
-                        // sh """docker run -u root -d --name 3x03-con \
-                        // -v /var/run/docker.sock:/var/run/docker.sock \
-                        // -v "$HOME":/home \
-                        // -p 5000:5000 \
-                        // -e VIRTUAL_PORT=5000 \
-                        // 3x03-img"""
-
-                        sh 'ls -lha'
-                        sh 'flask run'
-                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                        sh 'pkill -f flask'
+                    try {
+                        // delete bagatea-container
+                        sh 'yes | docker rm 3x03-con'
+                    }
+                    catch (Exception e) {
+                        echo "no container to remove"
                     }
                 }
                 
-                stage('Headless Browser Test') {
-                    agent {
-                        docker {
-                            image '3x03-img:latest'
-                            args '-p 5000:5000'
-                        }
-                    }
-                    steps {
-                        sh 'pytest -s -rA --junitxml=logs/report.xml'
-                    }
-                    post {
-                        always {
-                            junit testResults: 'logs/report.xml'
-                        }
-                    }
+                // build brand new bagatea-container with bagatea-image
+                sh """docker run -u root -d --name 3x03-con \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v "$HOME":/home \
+                -p 5000:5000 \
+                -e VIRTUAL_PORT=5000 \
+                3x03-img"""
 
+                sh 'nohup flask run &'
+                sh 'pytest -s -rA --junitxml=logs/report.xml'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh 'pkill -f flask'
+            }
+            post {
+                always {
+                    junit testResults: 'logs/report.xml'
                 }
             }
         }
+        // stage('Test') {
+        //     parallel {
+        //         stage('Deploy') {
+        //             agent {
+        //                 docker {
+        //                     image '3x03-img:latest'
+        //                     args '-p 5000:5000'
+        //                 }
+        //             }
+        //             steps {        
+        //                 script {
+        //                     try {
+        //                         // stop bagatea-container
+        //                         sh 'yes | docker stop 3x03-con'
+        //                     }
+        //                     catch (Exception e) {
+        //                         echo "no container to stop"
+        //                     }
+
+        //                     try {
+        //                         // delete bagatea-container
+        //                         sh 'yes | docker rm 3x03-con'
+        //                     }
+        //                     catch (Exception e) {
+        //                         echo "no container to remove"
+        //                     }
+        //                 }
+        //                 // // build brand new bagatea-container with bagatea-image
+        //                 // sh """docker run -u root -d --name 3x03-con \
+        //                 // -v /var/run/docker.sock:/var/run/docker.sock \
+        //                 // -v "$HOME":/home \
+        //                 // -p 5000:5000 \
+        //                 // -e VIRTUAL_PORT=5000 \
+        //                 // 3x03-img"""
+
+        //                 sh 'ls -lha'
+        //                 sh 'flask run'
+        //                 input message: 'Finished using the web site? (Click "Proceed" to continue)'
+        //                 sh 'pkill -f flask'
+        //             }
+        //         }
+                
+        //         // stage('Headless Browser Test') {
+        //         //     agent {
+        //         //         docker {
+        //         //             image '3x03-img:latest'
+        //         //             args '-p 5000:5000'
+        //         //         }
+        //         //     }
+        //         //     steps {
+        //         //         sh 'pytest -s -rA --junitxml=logs/report.xml'
+        //         //     }
+        //         //     post {
+        //         //         always {
+        //         //             junit testResults: 'logs/report.xml'
+        //         //         }
+        //         //     }
+
+        //         // }
+        //     }
+        // }
         // stage('Deliver') {
         //     steps {
         //         script {
