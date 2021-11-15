@@ -33,7 +33,11 @@ pipeline {
         stage('Test') {
             parallel {
                 stage('Deploy') {
-                    agent any
+                    agent {
+                        docker {
+                            image '3x03-img:latest'
+                        }
+                    }
                     steps {        
                         script {
                             try {
@@ -60,6 +64,7 @@ pipeline {
                         -e VIRTUAL_PORT=5000 \
                         3x03-img"""
 
+                        sh 'ls -lha'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
