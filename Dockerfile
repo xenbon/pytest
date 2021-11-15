@@ -8,17 +8,17 @@ RUN pip install -r requirements.txt
 RUN sbase install geckodriver
 RUN export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers
 
-# # Install OpenJDK-11
-# RUN apt-get update && \
-#     apt-get install -y default-jdk
+# Install OpenJDK-11
+RUN apt-get update && \
+    apt-get install -y default-jdk
 
 # Install Firefox
 RUN apt-get update && \
     apt-get install firefox-esr -y
     
-# # Setup JAVA_HOME -- useful for docker commandline
-# ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
-# RUN export JAVA_HOME
+# Setup JAVA_HOME -- useful for docker commandline
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+RUN export JAVA_HOME
 
 EXPOSE 5000
 
