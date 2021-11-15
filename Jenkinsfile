@@ -30,8 +30,8 @@ pipeline {
             }
         }
         
-        stage('Test') {
-            parallel {
+        // stage('Test') {
+        //     parallel {
                 stage('Deploy') {
                     agent {
                         docker {
@@ -43,37 +43,41 @@ pipeline {
                         sh 'pip install --upgrade pip'
                         sh 'pip install -r requirements.txt'
 
-                        
                         sh 'sbase install geckodriver'
                         sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
 
                         sh 'apt-get update && apt-get install firefox-esr -y'
 
-                        sh 'flask run'
+                        sh 'nohup flask run & pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
-                    }
-                }
-                
-                stage('Headless Browser Test') {
-                    agent {
-                        docker {
-                            image '3x03-img:latest'
-                            args '-p 5000:5000'
-                        }
-                    }
-                    steps {
-                        sh 'pytest -s -rA --junitxml=logs/report.xml'
                     }
                     post {
                         always {
                             junit testResults: 'logs/report.xml'
                         }
                     }
-
                 }
-            }
-        }
+                
+                // stage('Headless Browser Test') {
+                //     agent {
+                //         docker {
+                //             image '3x03-img:latest'
+                //             args '-p 5000:5000'
+                //         }
+                //     }
+                //     steps {
+                //         sh 'pytest -s -rA --junitxml=logs/report.xml'
+                //     }
+                //     post {
+                //         always {
+                //             junit testResults: 'logs/report.xml'
+                //         }
+                //     }
+
+                // }
+        //     }
+        // }
         // stage('Deliver') {
         //     steps {
         //         script {
