@@ -1,7 +1,7 @@
 FROM python:3.9
-# ADD . /Team02-AY21
-# WORKDIR /Team02-AY21
-# RUN pip install --upgrade pip
+ADD . /folder_3x03
+WORKDIR /folder_3x03
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # selanium testing
