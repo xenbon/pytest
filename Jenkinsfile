@@ -49,7 +49,7 @@ pipeline {
                         sh 'apt-get update && apt-get install firefox-esr -y'
 
                         sh 'nohup flask run & pytest -s -rA --junitxml=logs/report.xml'
-                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                        // input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
                     post {
