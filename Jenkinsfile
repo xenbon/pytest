@@ -10,13 +10,13 @@ pipeline {
         stage('Build') { 
             steps {
                 script {
-                    try {
-                        // clean all unused images
-                        sh 'yes | docker image prune -a'
-                    }
-                    catch (Exception e) {
-                        echo "no unused images deleted"
-                    }
+                    // try {
+                    //     // clean all unused images
+                    //     sh 'yes | docker image prune -a'
+                    // }
+                    // catch (Exception e) {
+                    //     echo "no unused images deleted"
+                    // }
                     try {
                         // clean all unused containers
                         sh 'yes | docker container prune'
@@ -26,18 +26,14 @@ pipeline {
                     }
                 }
                 // ensure latest image is being build
-                sh 'docker build -t 3x03-img:latest .'
+                // sh 'docker build -t 3x03-img:latest .'
             }
         }
     
         stage('Test') {
             parallel {
                 stage('Deploy') {
-                    agent {
-                        docker {
-                            image '3x03-img:latest'
-                        }
-                    }
+                    agent any
                     steps {        
                         script {
                             try {
@@ -56,15 +52,16 @@ pipeline {
                                 echo "no container to remove"
                             }
                         }
-                        // build brand new bagatea-container with bagatea-image
-                        sh """docker run -u root -d --name 3x03-con \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v "$HOME":/home \
-                        -p 5000:5000 \
-                        -e VIRTUAL_PORT=5000 \
-                        3x03-img"""
+                        // // build brand new bagatea-container with bagatea-image
+                        // sh """docker run -u root -d --name 3x03-con \
+                        // -v /var/run/docker.sock:/var/run/docker.sock \
+                        // -v "$HOME":/home \
+                        // -p 5000:5000 \
+                        // -e VIRTUAL_PORT=5000 \
+                        // 3x03-img"""
 
                         sh 'ls -lha'
+                        sh 'flask run'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
@@ -74,6 +71,7 @@ pipeline {
                     agent {
                         docker {
                             image '3x03-img:latest'
+                            args '-p 5000:5000'
                         }
                     }
                     steps {
