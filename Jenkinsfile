@@ -10,13 +10,13 @@ pipeline {
         stage('Build') { 
             steps {
                 script {
-                    // try {
-                    //     // clean all unused images
-                    //     sh 'yes | docker image prune -a'
-                    // }
-                    // catch (Exception e) {
-                    //     echo "no unused images deleted"
-                    // }
+                    try {
+                        // clean all unused images
+                        sh 'yes | docker image prune -a'
+                    }
+                    catch (Exception e) {
+                        echo "no unused images deleted"
+                    }
                     try {
                         // clean all unused containers
                         sh 'yes | docker container prune'
@@ -58,7 +58,7 @@ pipeline {
                 
                 // build brand new bagatea-container with bagatea-image
                 sh """docker run -u root -d --name 3x03-con \
-                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v /var/run/docker.sock:/var/run/docker.ro \
                 -v "$HOME":/home \
                 -e VIRTUAL_PORT=5000 \
                 3x03-img"""
