@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image '3x03-img:latest'
+            args '-p 5000:5000'
+        }
+    }
     environment {
         // CI set to true to allow it to run in "non-watch" (i.e. non-interactive) mode
         CI = 'true'
@@ -24,6 +29,16 @@ pipeline {
                     catch (Exception e) {
                         echo "no unused containers deleted"
                     }
+
+                    sh 'pip install --upgrade pip'
+                    sh 'pip install -r requirements.txt'
+
+                    
+                    sh 'sbase install geckodriver'
+                    sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
+
+                    
+                    sh 'apt-get update && apt-get install firefox-esr -y'
                 }
                 // ensure latest image is being build
                 // sh 'docker build -t 3x03-img:latest .'
@@ -31,12 +46,6 @@ pipeline {
         }
     
         stage('Test') {
-            agent {
-                docker {
-                    image '3x03-img:latest'
-                    args '-p 5000:5000'
-                }
-            }
             steps {
                 script {
                     try {
@@ -57,12 +66,12 @@ pipeline {
                 }
                 
                 // build brand new bagatea-container with bagatea-image
-                sh """docker run -u root -d --name 3x03-con \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v "$HOME":/home \
-                -p 5000:5000 \
-                -e VIRTUAL_PORT=5000 \
-                3x03-img"""
+                // sh """docker run -u root -d --name 3x03-con \
+                // -p 5000:5000 \
+                // -v /var/run/docker.sock:/var/run/docker.sock \
+                // -v "$HOME":/home \
+                // -e VIRTUAL_PORT=5000 \
+                // 3x03-img"""
 
                 sh 'nohup flask run &'
                 sh 'pytest -s -rA --junitxml=logs/report.xml'
