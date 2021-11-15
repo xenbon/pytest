@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
     environment {
         // CI set to true to allow it to run in "non-watch" (i.e. non-interactive) mode
         CI = 'true'
@@ -7,135 +7,53 @@ pipeline {
 //         HOST_PORT = "${HOST_PORT}"
     }
     stages {
-        stage('Build') { 
-            steps {
-                script {
-                    // try {
-                    //     // clean all unused images
-                    //     sh 'yes | docker image prune -a'
-                    // }
-                    // catch (Exception e) {
-                    //     echo "no unused images deleted"
-                    // }
-                    try {
-                        // clean all unused containers
-                        sh 'yes | docker container prune'
-                    }
-                    catch (Exception e) {
-                        echo "no unused containers deleted"
-                    }
-                }
-                // ensure latest image is being build
-                sh 'docker build -t 3x03-img:latest .'
-            }
-        }
-    
         stage('Test') {
-            agent {
-                docker {
-                    image '3x03-img:latest'
-                    // args '-p 5000:5000'
-                }
-            }
-            steps {
-                script {
-                    try {
-                        // stop bagatea-container
-                        sh 'yes | docker stop 3x03-con'
-                    }
-                    catch (Exception e) {
-                        echo "no container to stop"
-                    }
+            parallel {
+                stage('Deploy') {
+                    agent any
+                    steps {        
+                        sh 'pip install --upgrade pip'
+                        sh 'pip install -r requirements.txt'
 
-                    try {
-                        // delete bagatea-container
-                        sh 'yes | docker rm 3x03-con'
-                    }
-                    catch (Exception e) {
-                        echo "no container to remove"
+                        
+                        sh 'sbase install geckodriver'
+                        sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
+
+                        
+                        sh 'apt-get update && apt-get install firefox-esr -y'
+
+                        // build brand new bagatea-container with bagatea-image
+                        sh """docker run -u root -d --name 3x03-con \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v "$HOME":/home \
+                        -p 80:80 \
+                        3x03-img"""
+
+                        sh 'ls -lha'
+                        // sh 'flask run'
+                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                        sh 'pkill -f flask'
                     }
                 }
                 
-                // build brand new bagatea-container with bagatea-image
-                sh """docker run -u root -d --name 3x03-con \
-                -p 5000:5000 \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v "$HOME":/home \
-                -e VIRTUAL_PORT=5000 \
-                3x03-img"""
+                stage('Headless Browser Test') {
+                    agent {
+                        docker {
+                            image '3x03-img:latest'
+                        }
+                    }
+                    steps {
+                        sh 'pytest -s -rA --junitxml=logs/report.xml'
+                    }
+                    post {
+                        always {
+                            junit testResults: 'logs/report.xml'
+                        }
+                    }
 
-                sh 'nohup flask run &'
-                sh 'pytest -s -rA --junitxml=logs/report.xml'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh 'pkill -f flask'
-            }
-            post {
-                always {
-                    junit testResults: 'logs/report.xml'
                 }
             }
         }
-        // stage('Test') {
-        //     parallel {
-        //         stage('Deploy') {
-        //             agent {
-        //                 docker {
-        //                     image '3x03-img:latest'
-        //                     args '-p 5000:5000'
-        //                 }
-        //             }
-        //             steps {        
-        //                 script {
-        //                     try {
-        //                         // stop bagatea-container
-        //                         sh 'yes | docker stop 3x03-con'
-        //                     }
-        //                     catch (Exception e) {
-        //                         echo "no container to stop"
-        //                     }
-
-        //                     try {
-        //                         // delete bagatea-container
-        //                         sh 'yes | docker rm 3x03-con'
-        //                     }
-        //                     catch (Exception e) {
-        //                         echo "no container to remove"
-        //                     }
-        //                 }
-        //                 // // build brand new bagatea-container with bagatea-image
-        //                 // sh """docker run -u root -d --name 3x03-con \
-        //                 // -v /var/run/docker.sock:/var/run/docker.sock \
-        //                 // -v "$HOME":/home \
-        //                 // -p 5000:5000 \
-        //                 // -e VIRTUAL_PORT=5000 \
-        //                 // 3x03-img"""
-
-        //                 sh 'ls -lha'
-        //                 sh 'flask run'
-        //                 input message: 'Finished using the web site? (Click "Proceed" to continue)'
-        //                 sh 'pkill -f flask'
-        //             }
-        //         }
-                
-        //         // stage('Headless Browser Test') {
-        //         //     agent {
-        //         //         docker {
-        //         //             image '3x03-img:latest'
-        //         //             args '-p 5000:5000'
-        //         //         }
-        //         //     }
-        //         //     steps {
-        //         //         sh 'pytest -s -rA --junitxml=logs/report.xml'
-        //         //     }
-        //         //     post {
-        //         //         always {
-        //         //             junit testResults: 'logs/report.xml'
-        //         //         }
-        //         //     }
-
-        //         // }
-        //     }
-        // }
         // stage('Deliver') {
         //     steps {
         //         script {
