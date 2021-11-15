@@ -2,7 +2,7 @@ FROM python:3.9
 # ADD . /Team02-AY21
 # WORKDIR /Team02-AY21
 # RUN pip install --upgrade pip
-# RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
 # selanium testing
 RUN sbase install geckodriver
