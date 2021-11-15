@@ -10,18 +10,6 @@ pipeline {
         stage('Build') { 
             steps {
                 script {
-                    // try {
-                    //     sh 'yes | docker stop bagatea-container'
-                    // }
-                    // catch (Exception e) {
-                    //     echo "no container to stop"
-                    // }
-                    // try {
-                    //     sh 'yes | docker rmi -f bagatea-image'
-                    // }
-                    // catch (Exception e) {
-                    //     echo "no bagatea-image deleted"
-                    // }
                     try {
                         // clean all unused images
                         sh 'yes | docker image prune -a'
@@ -43,74 +31,85 @@ pipeline {
         }
     
         stage('Test') {
-//             parallel {
-//                 stage('Test: OWASP DependencyCheck') {
-//                     agent { 
-//                         docker {
-//                             image '3x03-img:latest'
-//                         }
-//                     }
-//                     steps {
-//                         dependencyCheck additionalArguments: '--format HTML --format XML --suppression suppression.xml \
-//                         --enableExperimental --disableOssIndex --disableAssembly --log odc.log', odcInstallation: 'OWASP-DC'
+            parallel {
+                stage('Deploy') {
+                    agent any
+                    steps {        
+                        script {
+                            try {
+                                // stop bagatea-container
+                                sh 'yes | docker stop 3x03-con'
+                            }
+                            catch (Exception e) {
+                                echo "no container to stop"
+                            }
 
-//                     }
-//                     post {
-//                         always {
-//                             dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-//                         }
-//                     }
-//                 }
-//                 stage('Test: Unit, Integration and UI Tests') {
+                            try {
+                                // delete bagatea-container
+                                sh 'yes | docker rm 3x03-con'
+                            }
+                            catch (Exception e) {
+                                echo "no container to remove"
+                            }
+                        }
+                        // build brand new bagatea-container with bagatea-image
+                        sh """docker run -u root -d --name 3x03-con \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v "$HOME":/home \
+                        -e VIRTUAL_PORT=80 \
+                        3x03-img"""
+
+                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                        sh 'pkill -f flask'
+                    }
+                }
+                
+                stage('Headless Browser Test') {
                     agent {
                         docker {
                             image '3x03-img:latest'
                         }
                     }
                     steps {
-                        sh 'nohup flask run & '
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
-                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                        sh 'pkill -f flask'
-//                         sh 'nohup python3 app.py & pytest -s -rA --junitxml=logs/report.xml'
-//                         sh 'pkill -f app.py'
                     }
                     post {
                         always {
                             junit testResults: 'logs/report.xml'
                         }
                     }
-//                 }
-//             }
-        }
-        stage('Deliver') {
-            steps {
-                script {
-                    try {
-                        // stop bagatea-container
-                        sh 'yes | docker stop 3x03-con'
-                    }
-                    catch (Exception e) {
-                        echo "no container to stop"
-                    }
 
-                    try {
-                        // delete bagatea-container
-                        sh 'yes | docker rm 3x03-con'
-                    }
-                    catch (Exception e) {
-                        echo "no container to remove"
-                    }
                 }
-                
-                // build brand new bagatea-container with bagatea-image
-                sh """docker run -u root -d --name 3x03-con \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v "$HOME":/home \
-                -e VIRTUAL_PORT=5000 \
-                3x03-img"""
             }
         }
+        // stage('Deliver') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 // stop bagatea-container
+        //                 sh 'yes | docker stop 3x03-con'
+        //             }
+        //             catch (Exception e) {
+        //                 echo "no container to stop"
+        //             }
+
+        //             try {
+        //                 // delete bagatea-container
+        //                 sh 'yes | docker rm 3x03-con'
+        //             }
+        //             catch (Exception e) {
+        //                 echo "no container to remove"
+        //             }
+        //         }
+                
+        //         // build brand new bagatea-container with bagatea-image
+        //         sh """docker run -u root -d --name 3x03-con \
+        //         -v /var/run/docker.sock:/var/run/docker.sock \
+        //         -v "$HOME":/home \
+        //         -e VIRTUAL_PORT=5000 \
+        //         3x03-img"""
+        //     }
+        // }
     }
     
 //                 -e HOST_IP -e HOST_PORT \
