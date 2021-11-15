@@ -7,28 +7,28 @@ pipeline {
 //         HOST_PORT = "${HOST_PORT}"
     }
     stages {
-        stage('Build') { 
-            steps {
-                script {
-                    try {
-                        // clean all unused images
-                        sh 'yes | docker image prune -a'
-                    }
-                    catch (Exception e) {
-                        echo "no unused images deleted"
-                    }
-                    try {
-                        // clean all unused containers
-                        sh 'yes | docker container prune'
-                    }
-                    catch (Exception e) {
-                        echo "no unused containers deleted"
-                    }
-                }
-                // ensure latest image is being build
-                sh 'docker build -t 3x03-img:latest .'
-            }
-        }
+        // stage('Build') { 
+        //     steps {
+        //         script {
+        //             try {
+        //                 // clean all unused images
+        //                 sh 'yes | docker image prune -a'
+        //             }
+        //             catch (Exception e) {
+        //                 echo "no unused images deleted"
+        //             }
+        //             try {
+        //                 // clean all unused containers
+        //                 sh 'yes | docker container prune'
+        //             }
+        //             catch (Exception e) {
+        //                 echo "no unused containers deleted"
+        //             }
+        //         }
+        //         // ensure latest image is being build
+        //         sh 'docker build -t 3x03-img:latest .'
+        //     }
+        // }
         
         // stage('Test') {
         //     parallel {
@@ -49,7 +49,7 @@ pipeline {
                         sh 'apt-get update && apt-get install firefox-esr -y'
 
                         sh 'nohup flask run & pytest -s -rA --junitxml=logs/report.xml'
-                        // input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
                     post {
