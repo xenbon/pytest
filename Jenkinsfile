@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent any
     environment {
         // CI set to true to allow it to run in "non-watch" (i.e. non-interactive) mode
         CI = 'true'
@@ -50,7 +50,7 @@ pipeline {
                         sh 'apt-get update && apt-get install firefox-esr -y'
 
                         sh 'ls -lha'
-                        // sh 'flask run'
+                        sh 'flask run'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
