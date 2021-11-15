@@ -36,6 +36,7 @@ pipeline {
                     agent {
                         docker {
                             image '3x03-img:latest'
+                            args '-p 5000:5000'
                         }
                     }
                     steps {        
@@ -46,10 +47,8 @@ pipeline {
                         sh 'sbase install geckodriver'
                         sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
 
-                        
                         sh 'apt-get update && apt-get install firefox-esr -y'
 
-                        sh 'ls -lha'
                         sh 'flask run'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
@@ -60,6 +59,7 @@ pipeline {
                     agent {
                         docker {
                             image '3x03-img:latest'
+                            args '-p 5000:5000'
                         }
                     }
                     steps {
