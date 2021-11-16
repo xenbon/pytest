@@ -27,6 +27,10 @@ pipeline {
                 }
                 // ensure latest image is being build
                 sh 'docker build -t 3x03-img:latest .'
+
+                sh 'pip freeze'
+
+                sh 'pwd'
         //     }
         // }
     
