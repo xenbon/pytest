@@ -27,21 +27,17 @@ pipeline {
                 }
                 // ensure latest image is being build
                 sh 'docker build -t 3x03-img:latest .'
-
-                sh 'pip freeze'
-
-                sh 'pwd'
-        //     }
-        // }
+            }
+        }
     
-        // stage('Test') {
-        //     agent {
-        //         docker {
-        //             image '3x03-img:latest'
-        //             // args '-p 5000:5000'
-        //         }
-        //     }
-        //     steps {
+        stage('Test') {
+            agent {
+                docker {
+                    image '3x03-img:latest'
+                    // args '-p 5000:5000'
+                }
+            }
+            steps {
                 script {
                     try {
                         // stop bagatea-container
@@ -59,6 +55,10 @@ pipeline {
                         echo "no container to remove"
                     }
                 }
+                
+                sh 'pip freeze'
+
+                sh 'pwd'
                 
                 // build brand new bagatea-container with bagatea-image
                 sh """docker run -u root -d --name 3x03-con \
