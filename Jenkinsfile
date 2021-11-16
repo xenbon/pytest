@@ -34,7 +34,6 @@ pipeline {
             agent {
                 docker {
                     image '3x03-img:latest'
-                    // args '-p 5000:5000'
                 }
             }
             steps {
@@ -55,19 +54,16 @@ pipeline {
                         echo "no container to remove"
                     }
                 }
-                
-                sh 'pip freeze'
 
-                sh 'pwd'
-                
-                // build brand new bagatea-container with bagatea-image
-                sh """docker run -u root -d --name 3x03-con \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v "$HOME":/home \
-                -p 5000:5000 \
-                3x03-img"""
+                // // build brand new bagatea-container with bagatea-image
+                // sh """docker run -u root -d --name 3x03-con \
+                // -v /var/run/docker.sock:/var/run/docker.sock \
+                // -v "$HOME":/home \
+                // -p 5000:5000 \
+                // 3x03-img"""
 
-                // sh 'nohup flask run &'
+
+                sh 'nohup flask run &'
                 sh 'pytest -s -rA --junitxml=logs/report.xml'
                 input message: 'Finished using the web site? (Click "Proceed" to continue)'
                 sh 'pkill -f flask'
