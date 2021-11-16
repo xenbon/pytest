@@ -34,6 +34,7 @@ pipeline {
             agent {
                 docker {
                     image '3x03-img:latest'
+                    args '-p 5000:5000'
                 }
             }
             steps {
@@ -54,14 +55,6 @@ pipeline {
                         echo "no container to remove"
                     }
                 }
-
-                // // build brand new bagatea-container with bagatea-image
-                // sh """docker run -u root -d --name 3x03-con \
-                // -v /var/run/docker.sock:/var/run/docker.sock \
-                // -v "$HOME":/home \
-                // -p 5000:5000 \
-                // 3x03-img"""
-
 
                 sh 'nohup flask run &'
                 sh 'pytest -s -rA --junitxml=logs/report.xml'
@@ -135,34 +128,34 @@ pipeline {
         //         // }
         //     }
         // }
-        // stage('Deliver') {
-        //     steps {
-        //         script {
-        //             try {
-        //                 // stop bagatea-container
-        //                 sh 'yes | docker stop 3x03-con'
-        //             }
-        //             catch (Exception e) {
-        //                 echo "no container to stop"
-        //             }
+        stage('Deliver') {
+            steps {
+                script {
+                    try {
+                        // stop bagatea-container
+                        sh 'yes | docker stop 3x03-con'
+                    }
+                    catch (Exception e) {
+                        echo "no container to stop"
+                    }
 
-        //             try {
-        //                 // delete bagatea-container
-        //                 sh 'yes | docker rm 3x03-con'
-        //             }
-        //             catch (Exception e) {
-        //                 echo "no container to remove"
-        //             }
-        //         }
+                    try {
+                        // delete bagatea-container
+                        sh 'yes | docker rm 3x03-con'
+                    }
+                    catch (Exception e) {
+                        echo "no container to remove"
+                    }
+                }
                 
-        //         // build brand new bagatea-container with bagatea-image
-        //         sh """docker run -u root -d --name 3x03-con \
-        //         -v /var/run/docker.sock:/var/run/docker.sock \
-        //         -v "$HOME":/home \
-        //         -e VIRTUAL_PORT=5000 \
-        //         3x03-img"""
-        //     }
-        // }
+                // build brand new bagatea-container with bagatea-image
+                sh """docker run -u root -d --name 3x03-con \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v "$HOME":/home \
+                -p 5000:5000 \
+                3x03-img"""
+            }
+        }
     }
     
 //                 -e HOST_IP -e HOST_PORT \
