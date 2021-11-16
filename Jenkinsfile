@@ -27,34 +27,34 @@ pipeline {
                 }
                 // ensure latest image is being build
                 sh 'docker build -t 3x03-img:latest .'
-            }
-        }
+        //     }
+        // }
     
-        stage('Test') {
-            agent {
-                docker {
-                    image '3x03-img:latest'
-                    // args '-p 5000:5000'
-                }
-            }
-            steps {
-                script {
-                    try {
-                        // stop bagatea-container
-                        sh 'yes | docker stop 3x03-con'
-                    }
-                    catch (Exception e) {
-                        echo "no container to stop"
-                    }
+        // stage('Test') {
+        //     agent {
+        //         docker {
+        //             image '3x03-img:latest'
+        //             // args '-p 5000:5000'
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             try {
+        //                 // stop bagatea-container
+        //                 sh 'yes | docker stop 3x03-con'
+        //             }
+        //             catch (Exception e) {
+        //                 echo "no container to stop"
+        //             }
 
-                    try {
-                        // delete bagatea-container
-                        sh 'yes | docker rm 3x03-con'
-                    }
-                    catch (Exception e) {
-                        echo "no container to remove"
-                    }
-                }
+        //             try {
+        //                 // delete bagatea-container
+        //                 sh 'yes | docker rm 3x03-con'
+        //             }
+        //             catch (Exception e) {
+        //                 echo "no container to remove"
+        //             }
+        //         }
                 
                 // build brand new bagatea-container with bagatea-image
                 sh """docker run -u root -d --name 3x03-con \
