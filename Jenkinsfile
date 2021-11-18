@@ -33,10 +33,9 @@ pipeline {
                         try {sh 'yes | docker rm thecon'}
                         catch (Exception e) {echo "no container to remove"}
                         }
-						sh """docker run -u root -d --name thecon \
+						sh """docker run -u root -d -p 80:80 --name thecon \
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v "$HOME":/home \
-                        -p 5000:5000 \
                         python:3.9"""
 
                         sh 'sleep 1'
