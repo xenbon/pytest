@@ -22,7 +22,7 @@ pipeline {
             }
         }
         
-        stage('Test: OWASP DependencyCheck') {
+        stage('OWASP-DC') {
             agent { 
                 docker {
                     image 'theimg:latest'
@@ -102,12 +102,12 @@ pipeline {
             }
             post {
                 always {
-                    junit testResults: 'warn-report.xml'
-                    recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
-                    recordIssues enabledForFailure: true, tool: checkStyle()
-                    recordIssues enabledForFailure: true, tool: spotBugs()
-                    recordIssues enabledForFailure: true, tool: cpd(pattern: '**/target/cpd.xml')
-                    recordIssues enabledForFailure: true, tool: pmdParser(pattern: '**/target/pmd.xml')
+                    
+                    // recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
+                    recordIssues enabledForFailure: true, tool: codeAnalysis()	
+                    recordIssues enabledForFailure: true, tool: codeChecker()
+                    recordIssues enabledForFailure: true, tool: codeNarc()
+                    recordIssues enabledForFailure: true, tool: dockerLint()
                 }
             }
         }
