@@ -20,7 +20,7 @@ RUN apt-get update && \
 # ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 # RUN export JAVA_HOME
 
-EXPOSE 5000
+EXPOSE 80
 
 # CMD ["uwsgi", "--socket", "0.0.0.0:5000", "--protocol=http", "-w", "wsgi:app", "--logto", "/tmp/wsgi.log"]
 CMD ["python3", "app.py"]

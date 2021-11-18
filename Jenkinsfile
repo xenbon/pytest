@@ -20,79 +20,52 @@ pipeline {
             }
         }
 
-        stage('Integration UI Test') {
-			parallel {
-				stage('Test') {
-                    agent {
-                        docker { image 'theimg:latest' }
-                    }
-                    steps {
-                        script {
-                            try {sh 'yes | docker stop thecon'}
-                            catch (Exception e) {echo "no container to stop"}
+        stage('Test') {
+            agent {
+                docker { image 'theimg:latest' }
+            }
+            steps {
+                script {
+                    try {sh 'yes | docker stop thecon'}
+                    catch (Exception e) {echo "no container to stop"}
 
-                            try {sh 'yes | docker rm thecon'}
-                            catch (Exception e) {echo "no container to remove"}
-                        }
-
-                        sh """docker run -u root -d --rm -p 80:80 --name thecon \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v "$HOME":/home \
-                        -e VIRTUAL_PORT=80 \
-                        theimg"""
-
-                        sh 'nohup flask run & sleep 1'
-                        sh 'pytest -s -rA --junitxml=logs/report.xml'
-                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                        sh 'pkill -f flask'
-                    }
-                    // post {
-                    //     always {
-                    //         junit testResults: 'logs/report.xml'
-                    //     }
-                    // }
+                    try {sh 'yes | docker rm thecon'}
+                    catch (Exception e) {echo "no container to remove"}
                 }
-				// stage('Headless Browser Test') {
-                //     agent {
-                //         docker {
-                //             image 'theimg:latest'
-                //         }
-                //     }
-				// 	steps {
-                //         sh 'sleep 5'
-                //         sh 'pytest -s -rA --junitxml=logs/report.xml'
-                //         // sh 'pkill -f flask'
-				// 	}
-				// 	post {
-                //         always {
-                //             junit testResults: 'logs/report.xml'
-                //         }
-                //     }
-				// }
-                stage('Hello.') {
-                    steps {
-                        sh 'echo "hello"'
-                    }
-                }
-			}
-		}
-        // stage('Deliver') {
-        //     steps {
-        //         script {
-        //             try {sh 'yes | docker stop thecon'}
-        //             catch (Exception e) {echo "no container to stop"}
 
-        //             try {sh 'yes | docker rm thecon'}
-        //             catch (Exception e) {echo "no container to remove"}
-        //         }
-                
-        //         // build brand new bagatea-container with bagatea-image
-        //         sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
-        //         -v /var/run/docker.sock:/var/run/docker.sock \
-        //         -v "$HOME":/home \
-        //         -e VIRTUAL_PORT=5000 \
-        //         theimg"""
-        //     }
-        // }
+                sh """docker run -u root -d --rm -p 80:80 --name thecon \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v "$HOME":/home \
+                -e VIRTUAL_PORT=80 \
+                theimg"""
+
+                sh 'nohup flask run & sleep 1'
+                sh 'pytest -s -rA --junitxml=logs/report.xml'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh 'pkill -f flask'
+            }
+            post {
+                always {
+                    junit testResults: 'logs/report.xml'
+                }
+            }
+        }
+        stage('Test: OWASP DependencyCheck') {
+            agent { 
+                docker {
+                    image 'theimg:latest'
+                }
+            }
+            steps {
+                dependencyCheck additionalArguments: '--format HTML --format XML', odcInstallation: 'OWASP-DC'
+                // --suppression suppression.xml 
+                // --enableExperimental --disableOssIndex --disableAssembly --log odc.log
+            }
+            post {
+                always {
+                    dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+                }
+            }
+        }
     }
 }
