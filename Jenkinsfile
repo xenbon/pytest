@@ -16,9 +16,9 @@ pipeline {
             steps {
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
-                sh 'apt install firefox-esr'
-                sh 'apt install selenium'
-                sh 'apt install seleniumbase'
+                sh 'apt-get install firefox-esr'
+                sh 'apt-get install selenium'
+                sh 'apt-get install seleniumbase'
                 sh 'sbase install geckodriver'
                 sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
             }
