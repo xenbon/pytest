@@ -3,6 +3,7 @@ pipeline {
         docker {
             image 'python:3.9'
             args '-p 5000:5000'
+            args '-v'
         }
     }
     environment {
@@ -16,7 +17,7 @@ pipeline {
             steps {
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
-                sh 'apt-get update'
+                sh 'apt-get update && apt-get install -y apt-transport-https'
                 sh 'apt-get install selenium'
                 sh 'apt-get install seleniumbase'
                 sh 'sbase install geckodriver'
