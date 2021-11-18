@@ -17,7 +17,7 @@ def browser():
     """
     # setup
     options = Options()
-    options.headless = False
+    options.headless = True # False for non-headless
     s = Firefox_Service(GeckoDriverManager().install())
     browser = webdriver.Firefox(service=s, options=options)
     
