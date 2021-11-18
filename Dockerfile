@@ -3,29 +3,21 @@ ADD . /folder_3x03
 WORKDIR /folder_3x03
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN apt-get update -y
 
 # selanium testing
 RUN sbase install geckodriver
 RUN export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers
+RUN apt-get install firefox-esr -y
 
-# Install OpenJDK-11
-RUN apt-get update && \
-    apt-get install default-jdk -y 
-
-# Setup JAVA_HOME -- useful for docker commandline
+# owasp-dc
+RUN apt-get install default-jdk -y 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 RUN export JAVA_HOME
-
-# Install Firefox
-RUN apt-get update && \
-    apt-get install firefox-esr -y
-    
 
 ## WARNINGS NEXT GEN PLUGIN
 RUN apt-get install npm -y
 RUN npm install -g dockerfile_lint
-
-
 
 EXPOSE 5000
 
