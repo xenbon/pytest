@@ -44,6 +44,7 @@ pipeline {
                         // sh 'docker exec thecon ls -lha'
                         // sh 'docker exec thecon python3 app.py'
 
+                        sh 'nohup flask run &'
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
