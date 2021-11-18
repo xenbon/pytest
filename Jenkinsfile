@@ -35,16 +35,18 @@ pipeline {
                             catch (Exception e) {echo "no container to remove"}
                         }
 
-                        sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v "$HOME":/home \
-                        -e VIRTUAL_PORT=5000 \
-                        theimg"""
+                        // sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
+                        // -v /var/run/docker.sock:/var/run/docker.sock \
+                        // -v "$HOME":/home \
+                        // -e VIRTUAL_PORT=5000 \
+                        // theimg"""
 
-                        sh 'nohup flask run & sleep 1'
+                        // sh 'nohup flask run & sleep 1'
+                        sh './jenkins/scripts/deliver.sh' 
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                        sh 'pkill -f flask'
+                        sh './jenkins/scripts/kill.sh' 
+                        // sh 'pkill -f flask'
                     }
                     // post {
                     //     always {
