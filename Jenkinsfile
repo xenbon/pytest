@@ -47,7 +47,7 @@ pipeline {
 
                         sh 'sleep 1'
 
-                        sh 'docker exec thecon pwd'
+                        sh 'docker exec thecon ls -lha'
                         sh 'docker exec thecon python3 app.py'
 
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
