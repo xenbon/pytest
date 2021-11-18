@@ -26,6 +26,11 @@ pipeline {
         stage('Integration UI Test') {
 			parallel {
 				stage('Deploy') {
+                    agent {
+                        docker {
+                            image 'python:3.9'
+                        }
+                    }
 					steps {
                         script {
                         try {sh 'yes | docker stop thecon'}
@@ -38,11 +43,12 @@ pipeline {
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v "$HOME":/home \
                         -e VIRTUAL_PORT=80 \
-                        python:3.9 python app.py"""
+                        python:3.9"""
 
                         sh 'sleep 1'
 
-                        sh 'docker exec thecon flask run'
+                        sh 'docker exec thecon pwd'
+                        sh 'docker exec thecon python3 app.py'
 
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
