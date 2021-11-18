@@ -19,8 +19,26 @@ pipeline {
                 sh 'docker build -t theimg:latest .'
             }
         }
+        
+        stage('Test: OWASP DependencyCheck') {
+            agent { 
+                docker {
+                    image 'theimg:latest'
+                }
+            }
+            steps {
+                dependencyCheck additionalArguments: '--format HTML --format XML', odcInstallation: 'OWASP-DC'
+                // --suppression suppression.xml 
+                // --enableExperimental --disableOssIndex --disableAssembly --log odc.log
+            }
+            post {
+                always {
+                    dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+                }
+            }
+        }
 
-        stage('Test') {
+        stage('Unit/Selenium-UI Test') {
             agent {
                 docker { image 'theimg:latest' }
             }
@@ -39,11 +57,12 @@ pipeline {
                 -e VIRTUAL_PORT=5000 \
                 theimg"""
 
-                sh 'nohup flask run & sleep 1'
-                sh 'echo $! > .pidfile'
+                sh 'nohup python3 app.py & sleep 1'
+                // sh 'echo $! > .pidfile'
                 sh 'pytest -s -rA --junitxml=logs/report.xml'
                 input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh 'kill $(cat .pidfile)'
+                sh 'pkill -f app.py'
+                // sh 'kill $(cat .pidfile)'
             }
             post {
                 always {
@@ -51,22 +70,6 @@ pipeline {
                 }
             }
         }
-        stage('Test: OWASP DependencyCheck') {
-            agent { 
-                docker {
-                    image 'theimg:latest'
-                }
-            }
-            steps {
-                dependencyCheck additionalArguments: '--format HTML --format XML', odcInstallation: 'OWASP-DC'
-                // --suppression suppression.xml 
-                // --enableExperimental --disableOssIndex --disableAssembly --log odc.log
-            }
-            post {
-                always {
-                    dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-                }
-            }
-        }
+        
     }
 }
