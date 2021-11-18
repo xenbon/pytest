@@ -38,7 +38,7 @@ pipeline {
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v "$HOME":/home \
                         -e VIRTUAL_PORT=80 \
-                        python:3.9 python3 app.py"""
+                        python:3.9 python app.py"""
 
                         sh 'sleep 1'
 
