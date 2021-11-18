@@ -30,6 +30,7 @@ pipeline {
             }
             steps {
                 dependencyCheck additionalArguments: '--format HTML --format XML', odcInstallation: 'OWASP-DC'
+                sh 'echo "" > pylint.log'
                 sh 'pylint $(git ls-files "*.py")'
                 // --suppression suppression.xml 
                 // --enableExperimental --disableOssIndex --disableAssembly --log odc.log
