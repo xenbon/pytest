@@ -42,7 +42,7 @@ pipeline {
                         theimg"""
 
                         sh 'nohup flask run & sleep 1'
-                        // sh 'pytest -s -rA --junitxml=logs/report.xml'
+                        sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
@@ -52,24 +52,28 @@ pipeline {
                     //     }
                     // }
                 }
-				stage('Headful Browser Test') {
-                    agent {
-                        docker {
-                            image 'theimg:latest'
-                        }
+				// stage('Headless Browser Test') {
+                //     agent {
+                //         docker {
+                //             image 'theimg:latest'
+                //         }
+                //     }
+				// 	steps {
+                //         sh 'sleep 5'
+                //         sh 'pytest -s -rA --junitxml=logs/report.xml'
+                //         // sh 'pkill -f flask'
+				// 	}
+				// 	post {
+                //         always {
+                //             junit testResults: 'logs/report.xml'
+                //         }
+                //     }
+				// }
+                stage('Hello.') {
+                    steps {
+                        sh 'echo "hello"'
                     }
-					steps {
-                        sh 'sleep 5'
-                        sh 'pytest -s -rA --junitxml=logs/report.xml'
-                        // sh 'pkill -f flask'
-                        sh 'echo "hello" '
-					}
-					post {
-                        always {
-                            junit testResults: 'logs/report.xml'
-                        }
-                    }
-				}
+                }
 			}
 		}
         // stage('Deliver') {
