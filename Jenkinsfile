@@ -36,7 +36,7 @@ pipeline {
             post {
                 always {
                     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-                    recordIssues enabledForFailure: true, tool: analysisParser(pattern: "dependency-check-report.xml" id: "owasp-dependency-check")
+                    recordIssues enabledForFailure: true, tool: analysisParser(pattern: "dependency-check-report.xml", id: "owasp-dependency-check")
                 }
             }
         }
@@ -92,27 +92,27 @@ pipeline {
         //     }
         // }
 
-        stage('warnings') {
-            agent {
-                docker { image 'theimg:latest' }
-            }
-            steps {
-                // sh 'nohup flask run & sleep 1'
-                // sh 'pytest -s -rA --junitxml=warn-report.xml'
-                echo "hello"
+        // stage('warnings') {
+        //     agent {
+        //         docker { image 'theimg:latest' }
+        //     }
+        //     steps {
+        //         // sh 'nohup flask run & sleep 1'
+        //         // sh 'pytest -s -rA --junitxml=warn-report.xml'
+        //         echo "hello"
 
-            }
-            post {
-                always {
+        //     }
+        //     post {
+        //         always {
                     
-                    // recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
+        //             // recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
                     
 
-                    recordIssues enabledForFailure: true, tool: codeAnalysis()	
-                    recordIssues enabledForFailure: true, tool: codeChecker()
-                    recordIssues enabledForFailure: true, tool: dockerLint()
-                }
-            }
-        }
+        //             recordIssues enabledForFailure: true, tool: codeAnalysis()	
+        //             recordIssues enabledForFailure: true, tool: codeChecker()
+        //             recordIssues enabledForFailure: true, tool: dockerLint()
+        //         }
+        //     }
+        // }
     }
 }
