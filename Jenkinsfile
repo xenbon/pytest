@@ -7,20 +7,20 @@ pipeline {
 //         HOST_PORT = "${HOST_PORT}"
     }
     stages {
-        // stage('Build') { 
-        //     steps {
-        //         script {
-        //             try { sh 'yes | docker image prune' }
-        //             catch (Exception e) { echo "no dangling images deleted" }
-        //             try { sh 'yes | docker image prune -a' }
-        //             catch (Exception e) { echo "no images w containers deleted" }
-        //             try { sh 'yes | docker container prune' }
-        //             catch (Exception e) { echo "no unused containers deleted" }
-        //         }
-        //         // ensure latest image is being build
-        //         sh 'docker build -t theimg:latest .'
-        //     }
-        // }
+        stage('Build') { 
+            steps {
+                script {
+                    try { sh 'yes | docker image prune' }
+                    catch (Exception e) { echo "no dangling images deleted" }
+                    try { sh 'yes | docker image prune -a' }
+                    catch (Exception e) { echo "no images w containers deleted" }
+                    try { sh 'yes | docker container prune' }
+                    catch (Exception e) { echo "no unused containers deleted" }
+                }
+                // ensure latest image is being build
+                sh 'docker build -t theimg:latest .'
+            }
+        }
         
         stage('OWASP-DC') {
             agent { 
