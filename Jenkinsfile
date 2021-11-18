@@ -95,9 +95,8 @@ pipeline {
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v "$HOME":/home \
                 -e VIRTUAL_PORT=5000 \
-                theimg
+                theimg"""
             }
         }
     }
-    
 }
