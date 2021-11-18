@@ -42,7 +42,7 @@ pipeline {
                         theimg"""
 
                         sh 'nohup flask run & sleep 1'
-                        sh 'pytest -s -rA --junitxml=logs/report.xml'
+                        // sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
