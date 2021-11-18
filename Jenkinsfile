@@ -27,19 +27,21 @@ pipeline {
 				stage('Deploy') {
 					steps {
                         script {
-                        try {sh 'yes | docker stop 3x03-con'}
+                        try {sh 'yes | docker stop thecon'}
                         catch (Exception e) {echo "no container to stop"}
 
-                        try {sh 'yes | docker rm 3x03-con'}
+                        try {sh 'yes | docker rm thecon'}
                         catch (Exception e) {echo "no container to remove"}
                         }
-						sh """docker run -u root -d --name 3x03-con \
+						sh """docker run -u root -d --name thecon \
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v "$HOME":/home \
                         -p 5000:5000 \
                         python:3.9"""
 
-                        sh 'docker exec 3x03-con flask run'
+                        sh 'sleep 1'
+
+                        sh 'docker exec thecon flask run'
 
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
