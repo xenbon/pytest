@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.9'
+        }
+    }
     environment {
         // CI set to true to allow it to run in "non-watch" (i.e. non-interactive) mode
         CI = 'true'
@@ -8,47 +12,37 @@ pipeline {
     }
     stages {
         stage('Build') { 
-            agent {
-                docker {
-                    image 'python:3.9'
-                }
-            }
             steps {
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
-                // sh 'apt-get update && apt-get install -y apt-transport-https'
-                // sh 'sbase install geckodriver'
-                // sh 'apt-get install firefox-esr -y'
-                // sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
+                sh 'apt-get update && apt-get install -y apt-transport-https'
+                sh 'sbase install geckodriver'
+                sh 'apt-get install firefox-esr -y'
+                sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
             }
         }
 
         stage('Integration UI Test') {
 			parallel {
 				stage('Deploy') {
-                    agent {
-                        docker {
-                            image 'python:3.9'
-                        }
-                    }
 					steps {
-                        script {
-                        try {sh 'yes | docker stop thecon'}
-                        catch (Exception e) {echo "no container to stop"}
+                        // script {
+                        // try {sh 'yes | docker stop thecon'}
+                        // catch (Exception e) {echo "no container to stop"}
 
-                        try {sh 'yes | docker rm thecon'}
-                        catch (Exception e) {echo "no container to remove"}
-                        }
-						sh """docker run -it -u root -d --rm -p 80:80 --name thecon \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v "$HOME":/home \
-                        -e VIRTUAL_PORT=80 \
-                        python:3.9"""
+                        // try {sh 'yes | docker rm thecon'}
+                        // catch (Exception e) {echo "no container to remove"}
+                        // }
+						// sh """docker run -it -u root -d --rm -p 80:80 --name thecon \
+                        // -v /var/run/docker.sock:/var/run/docker.sock \
+                        // -v "$HOME":/home \
+                        // -e VIRTUAL_PORT=80 \
+                        // python:3.9"""
 
-                        sh 'sleep 1'
+                        // sh 'sleep 1'
 
-                        sh 'docker exec thecon ls -lha'
-                        sh 'docker exec thecon python3 app.py'
+                        // sh 'docker exec thecon ls -lha'
+                        // sh 'docker exec thecon python3 app.py'
 
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
