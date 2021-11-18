@@ -53,7 +53,7 @@ pipeline {
                         -e VIRTUAL_PORT=5000 \
                         theimg"""
 
-                        sh 'nohup flask run'
+                        sh 'nohup flask run & sleep 1'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
@@ -64,6 +64,11 @@ pipeline {
                     // }
                 }
 				stage('Headful Browser Test') {
+                    agent {
+                        docker {
+                            image 'theimg:latest'
+                        }
+                    }
 					steps {
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
                         // sh 'pkill -f flask'
