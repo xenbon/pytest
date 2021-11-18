@@ -10,8 +10,10 @@ pipeline {
         stage('Build') { 
             steps {
                 script {
+                    try { sh 'yes | docker image prune' }
+                    catch (Exception e) { echo "no dangling images deleted" }
                     try { sh 'yes | docker image prune -a' }
-                    catch (Exception e) { echo "no unused images deleted" }
+                    catch (Exception e) { echo "no images w containers deleted" }
                     try { sh 'yes | docker container prune' }
                     catch (Exception e) { echo "no unused containers deleted" }
                 }
@@ -38,66 +40,9 @@ pipeline {
             }
         }
 
-        // stage('Unit/Selenium-UI Test') {
-        //     agent {
-        //         docker { image 'theimg:latest' }
-        //     }
-        //     steps {
-        //         script {
-        //             try {sh 'yes | docker stop thecon'}
-        //             catch (Exception e) {echo "no container to stop"}
-
-        //             try {sh 'yes | docker rm thecon'}
-        //             catch (Exception e) {echo "no container to remove"}
-        //         }
-
-        //         sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
-        //         -v /var/run/docker.sock:/var/run/docker.sock \
-        //         -v "$HOME":/home \
-        //         -e VIRTUAL_PORT=5000 \
-        //         theimg"""
-
-        //         sh 'nohup python3 app.py & sleep 1'
-        //         // sh 'echo $! > .pidfile'
-        //         sh 'pytest -s -rA --junitxml=logs/report.xml'
-        //         input message: 'Finished using the web site? (Click "Proceed" to continue)'
-        //         sh 'pkill -f app.py'
-        //         // sh 'kill $(cat .pidfile)'
-        //     }
-        //     post {
-        //         always {
-        //             junit testResults: 'logs/report.xml'
-        //         }
-        //     }
-        // }
-
-        stage('parallel unit/sel test') {
+        stage('unit/sel test') {
             parallel {
-                stage('Test') {
-                    agent {
-                        docker { image 'theimg:latest' }
-                    }
-                    steps {
-                        sh 'nohup flask run & sleep 1'
-                        sh 'pytest -s -rA --junitxml=logs/report.xml'
-                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                        sh 'pkill -f flask'
-
-                        script {
-                            try {sh 'yes | docker stop thecon'}
-                            catch (Exception e) {echo "no container to stop"}
-
-                            try {sh 'yes | docker rm thecon'}
-                            catch (Exception e) {echo "no container to remove"}
-                        }
-                    }
-                    post {
-                        always {
-                            junit testResults: 'logs/report.xml'
-                        }
-                    }
-                }
-                stage('Init Docker') {
+                stage('Deploy') {
                     agent {
                         docker { image 'theimg:latest' }
                     }
@@ -117,10 +62,54 @@ pipeline {
                         theimg"""
                     }
                 }
+                stage('Headless Browser Test') {
+                    agent {
+                        docker { image 'theimg:latest' }
+                    }
+                    steps {
+                        sh 'nohup flask run & sleep 1'
+                        sh 'pytest -s -rA --junitxml=test-report.xml'
+                        // input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                        
+                        script {
+                            try {sh 'pkill -f flask'}
+                            catch (Exception e) {echo "no process to kill"}
+
+                            try {sh 'yes | docker stop thecon'}
+                            catch (Exception e) {echo "no container to stop"}
+
+                            try {sh 'yes | docker rm thecon'}
+                            catch (Exception e) {echo "no container to remove"}
+                        }
+                    }
+                    post {
+                        always {
+                            junit testResults: 'test-report.xml'
+                        }
+                    }
+                }
             }
         }
 
-        
-        
+        stage('warnings') {
+            agent {
+                docker { image 'theimg:latest' }
+            }
+            steps {
+                sh 'nohup flask run & sleep 1'
+                sh 'pytest -s -rA --junitxml=warn-report.xml'
+
+            }
+            post {
+                always {
+                    junit testResults: 'warn-report.xml'
+                }
+            }
+            recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
+            recordIssues enabledForFailure: true, tool: checkStyle()
+            recordIssues enabledForFailure: true, tool: spotBugs()
+            recordIssues enabledForFailure: true, tool: cpd(pattern: '**/target/cpd.xml')
+            recordIssues enabledForFailure: true, tool: pmdParser(pattern: '**/target/pmd.xml')
+        }
     }
 }
