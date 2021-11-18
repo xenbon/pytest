@@ -38,38 +38,89 @@ pipeline {
             }
         }
 
-        stage('Unit/Selenium-UI Test') {
-            agent {
-                docker { image 'theimg:latest' }
-            }
-            steps {
-                script {
-                    try {sh 'yes | docker stop thecon'}
-                    catch (Exception e) {echo "no container to stop"}
+        // stage('Unit/Selenium-UI Test') {
+        //     agent {
+        //         docker { image 'theimg:latest' }
+        //     }
+        //     steps {
+        //         script {
+        //             try {sh 'yes | docker stop thecon'}
+        //             catch (Exception e) {echo "no container to stop"}
 
-                    try {sh 'yes | docker rm thecon'}
-                    catch (Exception e) {echo "no container to remove"}
+        //             try {sh 'yes | docker rm thecon'}
+        //             catch (Exception e) {echo "no container to remove"}
+        //         }
+
+        //         sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
+        //         -v /var/run/docker.sock:/var/run/docker.sock \
+        //         -v "$HOME":/home \
+        //         -e VIRTUAL_PORT=5000 \
+        //         theimg"""
+
+        //         sh 'nohup python3 app.py & sleep 1'
+        //         // sh 'echo $! > .pidfile'
+        //         sh 'pytest -s -rA --junitxml=logs/report.xml'
+        //         input message: 'Finished using the web site? (Click "Proceed" to continue)'
+        //         sh 'pkill -f app.py'
+        //         // sh 'kill $(cat .pidfile)'
+        //     }
+        //     post {
+        //         always {
+        //             junit testResults: 'logs/report.xml'
+        //         }
+        //     }
+        // }
+
+        stage('parallel unit/sel test') {
+            parellel {
+                stage('Test') {
+                    agent {
+                        docker { image 'theimg:latest' }
+                    }
+                    steps {
+                        sh 'nohup flask run & sleep 1'
+                        sh 'pytest -s -rA --junitxml=logs/report.xml'
+                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                        sh 'pkill -f flask'
+
+                        script {
+                            try {sh 'yes | docker stop thecon'}
+                            catch (Exception e) {echo "no container to stop"}
+
+                            try {sh 'yes | docker rm thecon'}
+                            catch (Exception e) {echo "no container to remove"}
+                        }
+                    }
+                    post {
+                        always {
+                            junit testResults: 'logs/report.xml'
+                        }
+                    }
                 }
+                stage('Init Docker') {
+                    agent {
+                        docker { image 'theimg:latest' }
+                    }
+                    steps {
+                        script {
+                            try {sh 'yes | docker stop thecon'}
+                            catch (Exception e) {echo "no container to stop"}
 
-                sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v "$HOME":/home \
-                -e VIRTUAL_PORT=5000 \
-                theimg"""
+                            try {sh 'yes | docker rm thecon'}
+                            catch (Exception e) {echo "no container to remove"}
+                        }
 
-                sh 'nohup python3 app.py & sleep 1'
-                // sh 'echo $! > .pidfile'
-                sh 'pytest -s -rA --junitxml=logs/report.xml'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh 'pkill -f app.py'
-                // sh 'kill $(cat .pidfile)'
-            }
-            post {
-                always {
-                    junit testResults: 'logs/report.xml'
+                        sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v "$HOME":/home \
+                        -e VIRTUAL_PORT=5000 \
+                        theimg"""
+                    }
                 }
             }
         }
+
+        
         
     }
 }
