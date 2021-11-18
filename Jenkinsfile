@@ -59,6 +59,7 @@ pipeline {
                         }
                     }
 					steps {
+                        sh 'sleep 5'
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
                         // sh 'pkill -f flask'
                         sh 'echo "hello" '
