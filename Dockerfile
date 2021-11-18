@@ -10,7 +10,7 @@ RUN export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/driver
 
 # Install OpenJDK-11
 RUN apt-get update && \
-    apt-get install -y default-jdk
+    apt-get install default-jdk -y 
 
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
@@ -22,7 +22,7 @@ RUN apt-get update && \
     
 
 ## WARNINGS NEXT GEN PLUGIN
-RUN apt-get install npm
+RUN apt-get install npm -y
 RUN npm install -g dockerfile_lint
 
 
