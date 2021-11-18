@@ -72,7 +72,7 @@ pipeline {
         // }
 
         stage('parallel unit/sel test') {
-            parellel {
+            parallel {
                 stage('Test') {
                     agent {
                         docker { image 'theimg:latest' }
