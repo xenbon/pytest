@@ -10,20 +10,10 @@ pipeline {
         stage('Build') { 
             steps {
                 script {
-                    try {
-                        // clean all unused images
-                        sh 'yes | docker image prune -a'
-                    }
-                    catch (Exception e) {
-                        echo "no unused images deleted"
-                    }
-                    try {
-                        // clean all unused containers
-                        sh 'yes | docker container prune'
-                    }
-                    catch (Exception e) {
-                        echo "no unused containers deleted"
-                    }
+                    try { sh 'yes | docker image prune -a' }
+                    catch (Exception e) { echo "no unused images deleted" }
+                    try { sh 'yes | docker container prune' }
+                    catch (Exception e) { echo "no unused containers deleted" }
                 }
                 // ensure latest image is being build
                 sh 'docker build -t theimg:latest .'
@@ -34,9 +24,7 @@ pipeline {
 			parallel {
 				stage('Test') {
                     agent {
-                        docker {
-                            image 'theimg:latest'
-                        }
+                        docker { image 'theimg:latest' }
                     }
                     steps {
                         script {
@@ -54,6 +42,7 @@ pipeline {
                         theimg"""
 
                         sh 'nohup flask run & sleep 1'
+                        sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
                     }
@@ -82,26 +71,23 @@ pipeline {
 				}
 			}
 		}
-    
-        
-        
-        stage('Deliver') {
-            steps {
-                script {
-                    try {sh 'yes | docker stop thecon'}
-                    catch (Exception e) {echo "no container to stop"}
+        // stage('Deliver') {
+        //     steps {
+        //         script {
+        //             try {sh 'yes | docker stop thecon'}
+        //             catch (Exception e) {echo "no container to stop"}
 
-                    try {sh 'yes | docker rm thecon'}
-                    catch (Exception e) {echo "no container to remove"}
-                }
+        //             try {sh 'yes | docker rm thecon'}
+        //             catch (Exception e) {echo "no container to remove"}
+        //         }
                 
-                // build brand new bagatea-container with bagatea-image
-                sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v "$HOME":/home \
-                -e VIRTUAL_PORT=5000 \
-                theimg"""
-            }
-        }
+        //         // build brand new bagatea-container with bagatea-image
+        //         sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
+        //         -v /var/run/docker.sock:/var/run/docker.sock \
+        //         -v "$HOME":/home \
+        //         -e VIRTUAL_PORT=5000 \
+        //         theimg"""
+        //     }
+        // }
     }
 }
