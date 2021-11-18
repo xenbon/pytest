@@ -41,6 +41,8 @@ pipeline {
                         -p 5000:5000 \
                         python:3.9"""
 
+                        sh 'docker exec -it 3x03-con flask run'
+
                         sh 'pytest -s -rA --junitxml=logs/report.xml'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'pkill -f flask'
