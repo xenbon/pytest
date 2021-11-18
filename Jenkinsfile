@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.9'
-        }
-    }
+    agent any
     environment {
         // CI set to true to allow it to run in "non-watch" (i.e. non-interactive) mode
         CI = 'true'
@@ -12,6 +8,11 @@ pipeline {
     }
     stages {
         stage('Build') { 
+            agent {
+                docker {
+                    image 'python:3.9'
+                }
+            }
             steps {
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
@@ -36,6 +37,7 @@ pipeline {
 						sh """docker run -u root -d --rm -p 80:80 --name thecon \
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v "$HOME":/home \
+                        -e VIRTUAL_PORT=80 \
                         python:3.9"""
 
                         sh 'sleep 1'
