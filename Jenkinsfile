@@ -18,8 +18,6 @@ pipeline {
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
                 sh 'apt-get update && apt-get install -y apt-transport-https'
-                sh 'apt-get install selenium'
-                sh 'apt-get install seleniumbase'
                 sh 'sbase install geckodriver'
                 sh 'apt-get install firefox-esr -y'
                 sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
