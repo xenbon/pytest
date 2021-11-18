@@ -15,10 +15,10 @@ pipeline {
             steps {
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
-                sh 'apt-get update && apt-get install -y apt-transport-https'
-                sh 'sbase install geckodriver'
-                sh 'apt-get install firefox-esr -y'
-                sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
+                // sh 'apt-get update && apt-get install -y apt-transport-https'
+                // sh 'sbase install geckodriver'
+                // sh 'apt-get install firefox-esr -y'
+                // sh 'export PATH=$PATH:/usr/local/lib/python3.9/site-packages/seleniumbase/drivers'
             }
         }
 
@@ -33,7 +33,7 @@ pipeline {
                         try {sh 'yes | docker rm thecon'}
                         catch (Exception e) {echo "no container to remove"}
                         }
-						sh """docker run -u root -d -p 80:80 --name thecon \
+						sh """docker run -u root -d --rm -p 80:80 --name thecon \
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v "$HOME":/home \
                         python:3.9"""
