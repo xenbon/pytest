@@ -21,6 +21,11 @@ RUN apt-get update && \
     apt-get install firefox-esr -y
     
 
+## WARNINGS NEXT GEN PLUGIN
+RUN apt-get install npm
+RUN npm install -g dockerfile_lint
+
+
 
 EXPOSE 5000
 

@@ -36,7 +36,7 @@ pipeline {
             post {
                 always {
                     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-                    recordIssues enabledForFailure: true, tool: checkStyle(**/dependency-check-report.xml)
+                    recordIssues enabledForFailure: true, tool: checkStyle("**/dependency-check-report.xml")
                 }
             }
         }
@@ -110,7 +110,6 @@ pipeline {
 
                     recordIssues enabledForFailure: true, tool: codeAnalysis()	
                     recordIssues enabledForFailure: true, tool: codeChecker()
-                    recordIssues enabledForFailure: true, tool: codeNarc()
                     recordIssues enabledForFailure: true, tool: dockerLint()
                 }
             }
