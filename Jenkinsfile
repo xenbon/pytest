@@ -36,7 +36,7 @@ pipeline {
             post {
                 always {
                     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-                    recordIssues enabledForFailure: true, tool: checkStyle("**/dependency-check-report.xml")
+                    recordIssues enabledForFailure: true, tool: pattern("**/dependency-check-report.xml")
                 }
             }
         }
