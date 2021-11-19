@@ -30,8 +30,8 @@ pipeline {
             }
             steps {
                 dependencyCheck additionalArguments: '--format HTML --format XML', odcInstallation: 'OWASP-DC'
-                sh 'echo "" > pylint.log'
-                sh 'pylint $(git ls-files "*.py") >> pylint.log'
+                // sh 'echo "" > pylint.log'
+                // sh 'pylint $(git ls-files "*.py") >> pylint.log'
                 // --suppression suppression.xml 
                 // --enableExperimental --disableOssIndex --disableAssembly --log odc.log
             }
@@ -39,7 +39,7 @@ pipeline {
                 always {
                     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
                     // recordIssues enabledForFailure: true, tool: analysisParser(pattern: "dependency-check-report.xml", id: "owasp-dependency-check")
-                    recordIssues enabledForFailure: true, tool: pyLint(pattern: 'pylint.log')
+                    // recordIssues enabledForFailure: true, tool: pyLint(pattern: 'pylint.log')
                 
                 }
             }
