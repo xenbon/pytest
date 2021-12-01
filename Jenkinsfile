@@ -78,9 +78,11 @@ pipeline {
                         sh 'pytest -s -rA --junitxml=test-report.xml'
 
                         // generate x09 report
-                        def scannerHome = tool 'SonarQube';
-                        withSonarQubeEnv('SonarQube') {
-                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
+                        script {
+                            def scannerHome = tool 'SonarQube';
+                            withSonarQubeEnv('SonarQube') {
+                                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
+                            }
                         }
                         
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
