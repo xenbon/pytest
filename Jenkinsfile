@@ -74,7 +74,14 @@ pipeline {
                     }
                     steps {
                         sh 'nohup flask run & sleep 1'
+                        // generate x07 pytest
                         sh 'pytest -s -rA --junitxml=test-report.xml'
+
+                        // generate x09 report
+                        def scannerHome = tool 'SonarQube';
+                        withSonarQubeEnv('SonarQube') {
+                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
+                        }
                         
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         
@@ -92,6 +99,7 @@ pipeline {
                     post {
                         always {
                             junit testResults: 'test-report.xml'
+                            reecordIssues enabledForFailure: true, tool: sonarQube()	
                         }
                     }
                 }
@@ -125,24 +133,23 @@ pipeline {
         // }
 
         /* X09 SonarQube */ 
-        stage('SonarQube') {
-            agent {
-                docker { image 'theimg:latest' }
-            }
-            steps {
-                script {
-                    sh 'curl http://172.17.0.3:9000'
-                    def scannerHome = tool 'SonarQube';
-                    withSonarQubeEnv('SonarQube') {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
-                    }
-                }
-            }
-            post {
-                always {
-                    recordIssues enabledForFailure: true, tool: sonarQube()	
-                }
-            }
-        }
+        // stage('SonarQube') {
+        //     agent {
+        //         docker { image 'theimg:latest' }
+        //     }
+        //     steps {
+        //         script {
+        //             def scannerHome = tool 'SonarQube';
+        //             withSonarQubeEnv('SonarQube') {
+        //                 sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
+        //             }
+        //         }
+        //     }
+        //     post {
+        //         always {
+        //             recordIssues enabledForFailure: true, tool: sonarQube()	
+        //         }
+        //     }
+        // }
     }
 }
