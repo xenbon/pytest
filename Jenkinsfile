@@ -88,8 +88,9 @@ pipeline {
                 script {
                     def scannerHome = tool 'SonarQube';
                     withSonarQubeEnv('SonarQube') {
+                        // rmb to change the "projectKey=your_project_name"
                         sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=. \
-                        -Dsonar.report.export.path=sonar-report.json"
+                        -Dsonar.report.export.path=logs/sonar-report.json"
                     }
                 }
             }
