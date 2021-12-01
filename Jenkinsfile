@@ -30,8 +30,6 @@ pipeline {
             }
             steps {
                 dependencyCheck additionalArguments: '--format HTML --format XML', odcInstallation: 'OWASP-DC'
-                // sh 'echo "" > pylint.log'
-                // sh 'pylint $(git ls-files "*.py") >> pylint.log'
                 // --suppression suppression.xml 
                 // --enableExperimental --disableOssIndex --disableAssembly --log odc.log
             }
@@ -45,78 +43,78 @@ pipeline {
             }
         }
 
-        // stage('unit/sel test') {
-        //     parallel {
-        //         stage('Deploy') {
-        //             agent {
-        //                 docker { image 'theimg:latest' }
-        //             }
-        //             steps {
-        //                 script {
-        //                     try {sh 'yes | docker stop thecon'}
-        //                     catch (Exception e) {echo "no container to stop"}
+        stage('unit/sel test') {
+            parallel {
+                stage('Deploy') {
+                    agent {
+                        docker { image 'theimg:latest' }
+                    }
+                    steps {
+                        script {
+                            try {sh 'yes | docker stop thecon'}
+                            catch (Exception e) {echo "no container to stop"}
 
-        //                     try {sh 'yes | docker rm thecon'}
-        //                     catch (Exception e) {echo "no container to remove"}
-        //                 }
+                            try {sh 'yes | docker rm thecon'}
+                            catch (Exception e) {echo "no container to remove"}
+                        }
 
-        //                 sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
-        //                 -v /var/run/docker.sock:/var/run/docker.sock \
-        //                 -v "$HOME":/home \
-        //                 -e VIRTUAL_PORT=5000 \
-        //                 theimg"""
-        //             }
-        //         }
-        //         stage('Headless Browser Test') {
-        //             agent {
-        //                 docker { image 'theimg:latest' }
-        //             }
-        //             steps {
-        //                 sh 'nohup flask run & sleep 1'
-        //                 sh 'pytest -s -rA --junitxml=test-report.xml'
-        //                 // input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                        sh """docker run -u root -d --rm -p 5000:5000 --name thecon \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v "$HOME":/home \
+                        -e VIRTUAL_PORT=5000 \
+                        theimg"""
+                    }
+                }
+                stage('Headless Browser Test') {
+                    agent {
+                        docker { image 'theimg:latest' }
+                    }
+                    steps {
+                        sh 'nohup flask run & sleep 1'
+                        sh 'pytest -s -rA --junitxml=test-report.xml'
+                        input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         
-        //                 script {
-        //                     try {sh 'pkill -f flask'}
-        //                     catch (Exception e) {echo "no process to kill"}
+                        script {
+                            try {sh 'pkill -f flask'}
+                            catch (Exception e) {echo "no process to kill"}
 
-        //                     try {sh 'yes | docker stop thecon'}
-        //                     catch (Exception e) {echo "no container to stop"}
+                            try {sh 'yes | docker stop thecon'}
+                            catch (Exception e) {echo "no container to stop"}
 
-        //                     try {sh 'yes | docker rm thecon'}
-        //                     catch (Exception e) {echo "no container to remove"}
-        //                 }
-        //             }
-        //             post {
-        //                 always {
-        //                     junit testResults: 'test-report.xml'
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                            try {sh 'yes | docker rm thecon'}
+                            catch (Exception e) {echo "no container to remove"}
+                        }
+                    }
+                    post {
+                        always {
+                            junit testResults: 'test-report.xml'
+                        }
+                    }
+                }
+            }
+        }
 
-        // stage('warnings') {
-        //     agent {
-        //         docker { image 'theimg:latest' }
-        //     }
-        //     steps {
-        //         // sh 'nohup flask run & sleep 1'
-        //         // sh 'pytest -s -rA --junitxml=warn-report.xml'
-        //         echo "hello"
+        stage('warnings') {
+            agent {
+                docker { image 'theimg:latest' }
+            }
+            steps {
+                sh 'nohup flask run & sleep 1'
+                sh 'pytest -s -rA --junitxml=warn-report.xml'
+                echo "hello"
 
-        //     }
-        //     post {
-        //         always {
+            }
+            post {
+                always {
                     
-        //             // recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
+                    // recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
                     
 
-        //             recordIssues enabledForFailure: true, tool: codeAnalysis()	
-        //             recordIssues enabledForFailure: true, tool: codeChecker()
-        //             recordIssues enabledForFailure: true, tool: dockerLint()
-        //         }
-        //     }
-        // }
+                    recordIssues enabledForFailure: true, tool: codeAnalysis()	
+                    recordIssues enabledForFailure: true, tool: codeChecker()
+                    recordIssues enabledForFailure: true, tool: dockerLint()
+                }
+            }
+        }
     }
 }
