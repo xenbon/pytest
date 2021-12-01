@@ -31,7 +31,7 @@ def test_http(browser):
     PLACEHOLDER / TO BE DELETED
     """
     wait = WebDriverWait(browser, 10)
-    browser.get("http://127.0.0.1:5000")
+    browser.get("http://apptest:5000")
 #     wait.until(EC.title_is("127.0.0.1:5000"))
 
     # check for https connection
