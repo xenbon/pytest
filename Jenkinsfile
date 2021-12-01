@@ -28,14 +28,13 @@ pipeline {
                 }
             }
         }
-        /* OWASP Dependency Check */
+        /* X06 OWASP Dependency Check */
         stage('OWASP-DC') {
             agent { 
                 docker { image 'theimg:latest'}
             }
             steps {
                 dependencyCheck additionalArguments: '--format HTML --format XML', odcInstallation: 'OWASP-DC'
-                
                 // --suppression suppression.xml  // suppress warnings xml 
                 // --enableExperimental // to test on python files
                 // --log odc.log // generate log file
@@ -43,13 +42,10 @@ pipeline {
             post {
                 always {
                     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-                    // untested codes of x08 below, do not uncomment unless you know what u doing. 
-                    // recordIssues enabledForFailure: true, tool: analysisParser(pattern: "dependency-check-report.xml", id: "owasp-dependency-check")
-                    // recordIssues enabledForFailure: true, tool: pyLint(pattern: 'pylint.log')
                 }
             }
         }
-        /* Selenium portion */
+        /* X07 Selenium portion */
         stage('unit/sel test') {
             parallel {
                 stage('Deploy') {
@@ -73,10 +69,9 @@ pipeline {
                     post {
                         always {
                             junit testResults: 'logs/uireport.xml'
+                            /* X08 Warnings Next Plugin */
                             recordIssues enabledForFailure: true, tool: codeAnalysis()	
                             recordIssues enabledForFailure: true, tool: codeChecker()
-                            // recordIssues enabledForFailure: true, tool: dockerLint()
-                            // recordIssues enabledForFailure: true, tool: pylint()
                         }
                     }
                 }
@@ -94,8 +89,8 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         // rmb to change the "projectKey=your_project_name"
                         sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
-                        // code not generating report.
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=. -Dsonar.report.export.path=logs/sonar-report.json"
+                        // code not generating report. do not uncomment unless yknow what u doing
+                        // sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=. -Dsonar.report.export.path=logs/sonar-report.json"
                     }
                 }
             }
