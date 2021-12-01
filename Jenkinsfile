@@ -58,6 +58,15 @@ pipeline {
                         sh 'docker run -d -p 5000:5000 --name apptest --network testing theimg:latest'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         sh 'docker container stop apptest'
+
+                        script {
+                            def scannerHome = tool 'SonarQube';
+                            withSonarQubeEnv('SonarQube') {
+                                // rmb to change the "projectKey=your_project_name"
+                                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=. \
+                                -Dsonar.report.export.path=logs/sonar-report.json"
+                            }
+                        }
                     }
                 }
                 stage('Headless Browser Test') {
@@ -75,6 +84,7 @@ pipeline {
                             junit testResults: 'logs/uireport.xml'
                             recordIssues enabledForFailure: true, tool: codeAnalysis()	
                             recordIssues enabledForFailure: true, tool: codeChecker()
+                            recordIssues enabledForFailure: true, tool: sonarQube()
                             // recordIssues enabledForFailure: true, tool: dockerLint()
                             // recordIssues enabledForFailure: true, tool: pylint()
                         }
@@ -84,26 +94,26 @@ pipeline {
         }
 
         /* X09 SonarQube */ 
-        stage('SonarQube') {
-            agent {
-                docker { image 'theimg:latest' }
-            }
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQube';
-                    withSonarQubeEnv('SonarQube') {
-                        // rmb to change the "projectKey=your_project_name"
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=. \
-                        -Dsonar.analysis.mode=preview -Dsonar.report.export.path=logs/sonar-report.json"
-                    }
-                }
-            }
-            post {
-                always {
-                    recordIssues enabledForFailure: true, tool: sonarQube()	
-                }
-            }
-        }
+        // stage('SonarQube') {
+        //     agent {
+        //         docker { image 'theimg:latest' }
+        //     }
+        //     steps {
+        //         script {
+        //             def scannerHome = tool 'SonarQube';
+        //             withSonarQubeEnv('SonarQube') {
+        //                 // rmb to change the "projectKey=your_project_name"
+        //                 sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=. \
+        //                 -Dsonar.report.export.path=logs/sonar-report.json"
+        //             }
+        //         }
+        //     }
+        //     post {
+        //         always {
+        //             recordIssues enabledForFailure: true, tool: sonarQube()	
+        //         }
+        //     }
+        // }
         
     }
 }
