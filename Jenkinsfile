@@ -46,6 +46,10 @@ pipeline {
                     // untested codes of x08 below, do not uncomment unless you know what u doing. 
                     // recordIssues enabledForFailure: true, tool: analysisParser(pattern: "dependency-check-report.xml", id: "owasp-dependency-check")
                     // recordIssues enabledForFailure: true, tool: pyLint(pattern: 'pylint.log')
+                    recordIssues enabledForFailure: true, tool: codeAnalysis()	
+                    recordIssues enabledForFailure: true, tool: codeChecker()
+                    recordIssues enabledForFailure: true, tool: dockerLint()
+                    recordIssues enabledForFailure: true, tool: pylint()
                 }
             }
         }
