@@ -1,5 +1,5 @@
 pipeline {
-    agent {dockerfile true}
+    agent { dockerfile true }
     environment {
         // CI set to true to allow it to run in "non-watch" (i.e. non-interactive) mode
         CI = 'true'
@@ -18,16 +18,16 @@ pipeline {
                     catch (Exception e) { echo "no unused containers deleted" }
                 }
                 // ensure latest image is being build
-                sh 'docker build -t theimg:latest .'
+                // sh 'docker build -t theimg:latest .'
             }
         }
         /* OWASP Dependency Check */
         stage('OWASP-DC') {
-            agent { 
-                docker {
-                    image 'theimg:latest'
-                }
-            }
+            // agent { 
+            //     docker {
+            //         image 'theimg:latest'
+            //     }
+            // }
             steps {
                 dependencyCheck additionalArguments: '--format HTML --format XML', odcInstallation: 'OWASP-DC'
                 
@@ -49,9 +49,9 @@ pipeline {
         stage('unit/sel test') {
             parallel {
                 stage('Deploy') {
-                    agent {
-                        docker { image 'theimg:latest' }
-                    }
+                    // agent {
+                    //     docker { image 'theimg:latest' }
+                    // }
                     steps {
                         script {
                             try {sh 'yes | docker stop thecon'}
@@ -69,9 +69,9 @@ pipeline {
                     }
                 }
                 stage('Headless Browser Test') {
-                    agent {
-                        docker { image 'theimg:latest' }
-                    }
+                    // agent {
+                    //     docker { image 'theimg:latest' }
+                    // }
                     steps {
                         sh 'nohup flask run & sleep 1'
                         sh 'pytest -s -rA --junitxml=test-report.xml'
@@ -79,10 +79,6 @@ pipeline {
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         
                         script {
-                            // def scannerHome = tool 'SonarQube';
-                            // withSonarQubeEnv('SonarQube') {
-                            //     sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
-                            // }
                             try {sh 'pkill -f flask'}
                             catch (Exception e) {echo "no process to kill"}
 
@@ -129,23 +125,23 @@ pipeline {
         // }
 
         /* X09 SonarQube */ 
-        stage('SonarQube') {
-            agent {
-                docker { image 'theimg:latest' }
-            }
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQube';
-                    withSonarQubeEnv('SonarQube') {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
-                    }
-                }
-            }
-            post {
-                always {
-                    recordIssues enabledForFailure: true, tool: sonarQube()	
-                }
-            }
-        }
+        // stage('SonarQube') {
+        //     agent {
+        //         docker { image 'theimg:latest' }
+        //     }
+        //     steps {
+        //         script {
+        //             def scannerHome = tool 'SonarQube';
+        //             withSonarQubeEnv('SonarQube') {
+        //                 sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
+        //             }
+        //         }
+        //     }
+        //     post {
+        //         always {
+        //             recordIssues enabledForFailure: true, tool: sonarQube()	
+        //         }
+        //     }
+        // }
     }
 }
