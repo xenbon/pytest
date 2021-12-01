@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent {dockerfile true}
     environment {
         // CI set to true to allow it to run in "non-watch" (i.e. non-interactive) mode
         CI = 'true'
@@ -75,9 +75,14 @@ pipeline {
                     steps {
                         sh 'nohup flask run & sleep 1'
                         sh 'pytest -s -rA --junitxml=test-report.xml'
+                        
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
                         
                         script {
+                            // def scannerHome = tool 'SonarQube';
+                            // withSonarQubeEnv('SonarQube') {
+                            //     sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
+                            // }
                             try {sh 'pkill -f flask'}
                             catch (Exception e) {echo "no process to kill"}
 
