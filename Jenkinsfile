@@ -13,9 +13,9 @@ pipeline {
             }
             steps {
                 script {
-                    try {sh 'yes | docker stop thecon'}
+                    try {sh 'yes | docker stop apptest'}
                     catch (Exception e) {echo "no container to stop"}
-                    try {sh 'yes | docker rm thecon'}
+                    try {sh 'yes | docker rm apptest'}
                     catch (Exception e) {echo "no container to remove"}        
                     try { sh 'yes | docker image prune' }
                     catch (Exception e) { echo "no dangling images deleted" }
@@ -53,7 +53,12 @@ pipeline {
                     steps {
                         sh 'docker run -d -p 5000:5000 --name apptest --network testing theimg:latest'
                         input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                        sh 'docker container stop apptest'
+                        script {
+                            try {sh 'yes | docker stop apptest'}
+                            catch (Exception e) {echo "no container to stop"}
+                            try {sh 'yes | docker rm apptest'}
+                            catch (Exception e) {echo "no container to remove"}  
+                        }
                     }
                 }
                 stage('Headless Browser Test') {
@@ -89,7 +94,7 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         // rmb to change the "projectKey=your_project_name"
                         sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
-                        
+
                         // code not generating report. do not uncomment unless yknow what u doing
                         // sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=. -Dsonar.report.export.path=logs/sonar-report.json"
                     }
