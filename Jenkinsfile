@@ -101,7 +101,7 @@ pipeline {
                     post {
                         always {
                             junit testResults: 'test-report.xml'
-                            reecordIssues enabledForFailure: true, tool: sonarQube()	
+                            recordIssues enabledForFailure: true, tool: sonarQube()	
                         }
                     }
                 }
