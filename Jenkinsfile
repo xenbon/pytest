@@ -76,7 +76,7 @@ pipeline {
                             recordIssues enabledForFailure: true, tool: codeAnalysis()	
                             recordIssues enabledForFailure: true, tool: codeChecker()
                             // recordIssues enabledForFailure: true, tool: dockerLint()
-                            recordIssues enabledForFailure: true, tool: pylint()
+                            // recordIssues enabledForFailure: true, tool: pylint()
                         }
                     }
                 }
