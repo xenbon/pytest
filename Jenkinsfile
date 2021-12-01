@@ -122,5 +122,27 @@ pipeline {
         //         }
         //     }
         // }
+
+        /* X09 SonarQube */ 
+        stage('SonarQube') {
+            
+            agent {
+                docker { image 'theimg:latest' }
+            }
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQube';
+                    withSonarQubeEnv('SonarQube') {
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=OWSAP -
+                        Dsonar.sources=."
+                    }
+                }
+            }
+            post {
+                always {
+                    recordIssues enabledForFailure: true, tool: sonarQube()	
+                }
+            }
+        }
     }
 }
