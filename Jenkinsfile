@@ -89,6 +89,7 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         // rmb to change the "projectKey=your_project_name"
                         sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
+                        
                         // code not generating report. do not uncomment unless yknow what u doing
                         // sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=. -Dsonar.report.export.path=logs/sonar-report.json"
                     }
