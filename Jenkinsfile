@@ -125,7 +125,6 @@ pipeline {
 
         /* X09 SonarQube */ 
         stage('SonarQube') {
-            
             agent {
                 docker { image 'theimg:latest' }
             }
@@ -133,7 +132,7 @@ pipeline {
                 script {
                     def scannerHome = tool 'SonarQube';
                     withSonarQubeEnv('SonarQube') {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test - Dsonar.sources=."
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
                     }
                 }
             }
