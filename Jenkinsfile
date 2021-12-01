@@ -13,7 +13,6 @@ pipeline {
 	    }
 	    steps {
             script {
-                script {
                 try {sh 'yes | docker stop thecon'}
                 catch (Exception e) {echo "no container to stop"}
                 try {sh 'yes | docker rm thecon'}
@@ -24,7 +23,6 @@ pipeline {
                 catch (Exception e) { echo "no images w containers deleted" }
                 try { sh 'yes | docker container prune' }
                 catch (Exception e) { echo "no unused containers deleted" }
-                }
                 // ensure latest image is being build
                 sh 'docker build -t theimg:latest .'
             }
