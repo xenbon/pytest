@@ -132,7 +132,6 @@ pipeline {
             steps {
                 script {
                     sh 'curl http://172.17.0.3:9000'
-                    sh 'curl http://127.0.0.1:9000'
                     def scannerHome = tool 'SonarQube';
                     withSonarQubeEnv('SonarQube') {
                         sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=test -Dsonar.sources=."
